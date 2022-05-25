@@ -16,9 +16,9 @@ from catboost import CatBoostClassifier
 
 def objective(X,Y,trial):
     params = {
-        'iterations' : trial.suggest_int('iterations', 50, 300),                         
+        'iterations' : trial.suggest_int('iterations', 100,5000),                         
         'depth' : trial.suggest_int('depth', 4, 10),                                       
-        'learning_rate' : trial.suggest_loguniform('learning_rate', 0.01, 0.3),               
+        'learning_rate' : trial.suggest_loguniform('learning_rate', 1e-5, 1e-1),               
         'random_strength' :trial.suggest_int('random_strength', 0, 100),                       
         'bagging_temperature' :trial.suggest_loguniform('bagging_temperature', 0.01, 100.00), 
         'od_type': trial.suggest_categorical('od_type', ['IncToDec', 'Iter']),

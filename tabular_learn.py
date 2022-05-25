@@ -9,7 +9,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
 from catboost import CatBoostClassifier
-from sklearn.ensemble import RandomForestClassifier
 
 scaler = StandardScaler()
 train = pd.read_csv("input/train.csv")
@@ -29,13 +28,13 @@ for df in [X,X_test]:
     i_00_01_26 = df.f_00 + df.f_01 + df.f_26
     df['i_00_01_26'] = (i_00_01_26 > 5.0).astype(int) - (i_00_01_26 < -5.0).astype(int)
 
-params={'iterations': 284,
+params={'iterations': 4516, 
         'depth': 10,
-        'learning_rate': 0.24641023327616474,
-        'random_strength': 0, 
-        'bagging_temperature': 0.21482075013237478,
+        'learning_rate': 0.03946057958646794, 
+        'random_strength': 86,
+        'bagging_temperature': 0.7680045063918526,
         'od_type': 'Iter', 
-        'od_wait': 31,
+        'od_wait': 43,
         'task_type': "GPU"}
 
 X = pd.DataFrame(scaler.fit_transform(X),columns=X.columns)
