@@ -2,17 +2,18 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.ensemble import RandomForestClassifier
-from lightgbm import LGBMClassifier
+#from lightgbm import LGBMClassifier
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 from scipy.stats import mode
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import KFold
+
+scaler = StandardScaler()
 
 train_df = pd.read_csv('input/train.csv')
 test_df = pd.read_csv('input/test.csv')
-
-scaler = MinMaxScaler()
 
 def preprocess(X):
     count_list = []
@@ -35,17 +36,21 @@ X = preprocess(X)
 X_test = preprocess(X_test)
 y = y.values
 
+
 predictions, scores = [], []
 skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=1)
-for fold, (train_idx, valid_idx) in enumerate(skf.split(X, y)):
-    print(10*"=", f"Fold={fold+1}", 10*"=")
+kf = KFold(n_splits=5)
 
+for fold, (train_idx, valid_idx) in enumerate(kf.split(X)):
+    
+    print(10*"=", f"Fold={fold+1}", 10*"=")
+    
 #     X_train, y_train = X.iloc[train_idx], y.iloc[train_idx]
 #     X_valid , y_valid = X.iloc[valid_idx] , y.iloc[valid_idx]
     X_train, y_train = X[train_idx], y[train_idx]
     X_valid , y_valid = X[valid_idx] , y[valid_idx]
     
-    model = RandomForestClassifier(max_depth=5, random_state=1)
+    model = RandomForestClassifier(random_state=1)
     model.fit(X_train, y_train)
     
     preds_valid = model.predict(X_valid)
@@ -57,6 +62,7 @@ for fold, (train_idx, valid_idx) in enumerate(skf.split(X, y)):
     
 score = np.array(scores).mean()
 print(f'Mean accuracy score: {score:6f}')
+
 y_pred = mode(predictions).mode[0]
 submission = pd.DataFrame({"id": test_df.id, "target" : y_pred})
 submission.to_csv('output/submission.csv', index=False)
