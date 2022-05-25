@@ -45,12 +45,13 @@ def initialsetting(train_path,test_path):
     X_test = pd.DataFrame(scaler.transform(test),columns=X.columns)
     Y = train['target']
     
-    return X,X_test,Y
+    return X,X_test,Y,test
 
 def kfold(model,X,X_test,Y):
     k_fold = KFold(n_splits=5, shuffle=True, random_state=1)
     Y_valid, model_val_preds, model_test_preds=[],[],[]
     cal_true, cal_pred=[],[]
+    sum_AUC,sum_ACC,best_AUC,best_fold = 0,0,0,0
     feat_importance=pd.DataFrame(index=X.columns)
     
     for fold, (train_idx, val_idx) in enumerate(k_fold.split(X,Y)):
@@ -64,7 +65,7 @@ def kfold(model,X,X_test,Y):
       model_prob = model.predict_proba(X_val)[:,1]
       Y_valid.append(Y_val)
       model_val_preds.append(model_prob)
-      model_test_preds.append(model.predict_proba(X_test)[:,1])
+      model_test_preds.append(model.predict(X_test))
       feat_importance["Importance_Fold"+str(fold)]=model.feature_importances_
       
       calibrated_model = CalibratedClassifierCV(base_estimator=model,cv="prefit")
@@ -75,14 +76,26 @@ def kfold(model,X,X_test,Y):
       cal_pred.append(prob_pred)
       auc_score = roc_auc_score(Y_val, model_prob)
       acc_score = model.score(X_val,Y_val)
+      sum_AUC += auc_score
+      sum_ACC += acc_score
       print("Validation AUC = {:.4f}".format(auc_score))
       print("Validation ACC = {:.4f}".format(acc_score))
       
+      if auc_score > best_AUC:
+          best_AUC = auc_score
+          best_ACC = acc_score
+          best_fold = fold
+          
       del X_train, Y_train, X_val, Y_val
     
+    print("")
+    print("Mean AUC = {:.4f}  Mean ACC = {:.4f}".format(sum_AUC/(fold+1),sum_ACC/(fold+1)))
+    print("")
+    print("Best Fold : {}\n Best AUC = {:.4f}  Best ACC = {:.4f}"
+          .format(best_fold+1,best_AUC,best_ACC))
     plot_roc_calibration(Y_valid, model_val_preds, cal_true, cal_pred)
     gc.collect()
-    return model_test_preds
+    return model_test_preds[best_fold]
       
 def plot_roc_calibration(y_val, y_prob, mpv_cal, fop_cal):
     fig = go.Figure()
@@ -125,23 +138,23 @@ def plot_roc_calibration(y_val, y_prob, mpv_cal, fop_cal):
     fig.write_image('output/Probability Calibration Curves.png')
 
 def main():
-    X,X_test,Y = initialsetting(train_path,test_path)
+    X,X_test,Y,test = initialsetting(train_path,test_path)
     
     params={'iterations': 284,
-        'depth': 10,
-        'learning_rate': 0.24641023327616474,
-        'random_strength': 0, 
-        'bagging_temperature': 0.21482075013237478,
-        'od_type': 'Iter', 
-        'od_wait': 31,
-        'task_type': "GPU"}   
+            'depth': 10,
+            'learning_rate': 0.24641023327616474,
+            'random_strength': 0, 
+            'bagging_temperature': 0.21482075013237478,
+            'od_type': 'Iter', 
+            'od_wait': 31,
+            'task_type': "GPU"}   
     
     model = CatBoostClassifier(**params)
     
     result = kfold(model,X,X_test,Y)
     
-    #output = pd.DataFrame({"id": X_test.id, "target" : predictions})
-    #output.to_csv("output/submission.csv",index=False)
+    output = pd.DataFrame({"id": test.id, "target" : result})
+    output.to_csv("output/submission.csv",index=False)
 
 if __name__ == '__main__':
     main()

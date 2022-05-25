@@ -46,6 +46,6 @@ model.fit(X,Y)
 
 predictions = model.predict(X_test)
 
-output = pd.DataFrame({"id": X_test.id, "target" : predictions})
+output = pd.DataFrame({"id": test.id, "target" : predictions})
 
 output.to_csv("output/submission.csv",index=False)
