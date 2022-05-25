@@ -7,12 +7,11 @@ Created on Fri May 20 13:16:54 2022
 
 import pandas as pd
 import matplotlib.pyplot as plt
-from lightgbm import LGBMClassfier
+from sklearn.preprocessing import StandardScaler
+from catboost import CatBoostClassifier
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.kernel_approximation import RBFSampler
-from sklearn.linear_model import SGDClassifier
 
-
+scaler = StandardScaler()
 train = pd.read_csv("input/train.csv")
 test  = pd.read_csv("input/test.csv")
 
@@ -21,31 +20,33 @@ uni_test = test.f_27.apply(lambda s: len(set(s))).rename('unique_characters')
 train['f_27'] = uni
 test['f_27'] = uni_test
 
-features = train['id']
-features_test = test['id']
-for i in range(len(train.columns)):
-    if train.columns[i] == "id" or train.columns[i] == "target": pass
-    else: 
-        features = pd.concat([features,train[train.columns[i]]],axis=1)
-        
-for i in range(len(test.columns)):
-    if test.columns[i] == "id" or test.columns[i] == "target": pass
-    else: 
-        features_test = pd.concat([features_test,test[test.columns[i]]],axis=1)
+X = train.drop(["target"],axis=1)
+X_test = test
     
-for df in [features,features_test]:
+for df in [X,X_test]:
     df['i_02_21'] = (df.f_21 + df.f_02 > 5.2).astype(int) - (df.f_21 + df.f_02 < -5.3).astype(int)
     df['i_05_22'] = (df.f_22 + df.f_05 > 5.1).astype(int) - (df.f_22 + df.f_05 < -5.4).astype(int)
     i_00_01_26 = df.f_00 + df.f_01 + df.f_26
     df['i_00_01_26'] = (i_00_01_26 > 5.0).astype(int) - (i_00_01_26 < -5.0).astype(int)
 
-model = RandomForestClassifier(n_estimators=100,random_state=1)
+params={'iterations': 284,
+        'depth': 10,
+        'learning_rate': 0.24641023327616474,
+        'random_strength': 0, 
+        'bagging_temperature': 0.21482075013237478,
+        'od_type': 'Iter', 
+        'od_wait': 31,
+        'task_type': "GPU"}
 
+X = pd.DataFrame(scaler.fit_transform(X),columns=X.columns)
+X_test = pd.DataFrame(scaler.transform(test),columns=X_test.columns)
 Y = train['target']
 
-model.fit(features,Y)
-predictions = model.predict(features_test)
+model = CatBoostClassifier(**params)
+model.fit(X,Y)
 
-output = pd.DataFrame({"id": test.id, "target" : predictions})
+predictions = model.predict(X_test)
+
+output = pd.DataFrame({"id": X_test.id, "target" : predictions})
 
 output.to_csv("output/submission.csv",index=False)

@@ -1,4 +1,5 @@
 *.csv
 !output/*
 .DS_Store
+catboost_info
 
