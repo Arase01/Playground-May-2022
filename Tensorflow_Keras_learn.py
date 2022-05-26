@@ -30,7 +30,7 @@ test_path = "input/test.csv"
 X,X_test,Y,test = initialsetting(train_path,test_path)
 features = X_test.columns
 
-EPOCHS = 1
+EPOCHS = 200
 EPOCHS_COSINEDECAY = 150
 CYCLES = 1
 VERBOSE = 0 # set to 0 for less output, or to 2 for more output
@@ -166,9 +166,9 @@ def main():
         result_list.append(result)
         
         if ONLY_FIRST_FOLD: break # we only need the first fold
-      
-    print(type(result_list[best_fold]))
-    test_pred = sum(result_list[best_fold],[])
+        
+    test_pred = result_list[best_fold].reshape([len(test.id)])
+    print(test_pred)
     output = pd.DataFrame({"id": test.id, "target" : test_pred})
     output.to_csv("output/submission.csv",index=False)
         
