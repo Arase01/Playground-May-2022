@@ -140,17 +140,14 @@ def plot_roc_calibration(y_val, y_prob, mpv_cal, fop_cal):
 def main():
     X,X_test,Y,test = initialsetting(train_path,test_path)
     
-    
-    
-    params={'iterations': 4516, 
-        'depth': 10,
-        'learning_rate': 0.03946057958646794, 
-        'random_strength': 86,
-        'bagging_temperature': 0.7680045063918526,
-        'od_type': 'Iter', 
-        'od_wait': 43,
-        'task_type': "GPU"}
-
+    params={'iterations': 284,
+         'depth': 10,
+         'learning_rate': 0.24641023327616474,
+         'random_strength': 0, 
+         'bagging_temperature': 0.21482075013237478,
+         'od_type': 'Iter', 
+         'od_wait': 31,
+         'task_type': "GPU"} 
     
     model = CatBoostClassifier(**params)
     
