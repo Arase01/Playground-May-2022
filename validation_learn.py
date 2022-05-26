@@ -32,8 +32,8 @@ def initialsetting(train_path,test_path):
     train['f_27'] = uni
     test['f_27'] = uni_test
     
-    X = train.drop(["target"],axis=1)
-    X_test = test
+    X = train.drop(["id","target"],axis=1)
+    X_test = test.drop(["id"],axis=1)
     
     for df in [X,X_test]:
         df['i_02_21'] = (df.f_21 + df.f_02 > 5.2).astype(int) - (df.f_21 + df.f_02 < -5.3).astype(int)
@@ -42,7 +42,7 @@ def initialsetting(train_path,test_path):
         df['i_00_01_26'] = (i_00_01_26 > 5.0).astype(int) - (i_00_01_26 < -5.0).astype(int)
     
     X = pd.DataFrame(scaler.fit_transform(X),columns=X.columns)
-    X_test = pd.DataFrame(scaler.transform(test),columns=X.columns)
+    X_test = pd.DataFrame(scaler.transform(X_test),columns=X.columns)
     Y = train['target']
     
     return X,X_test,Y,test
@@ -65,7 +65,7 @@ def kfold(model,X,X_test,Y):
       model_prob = model.predict_proba(X_val)[:,1]
       Y_valid.append(Y_val)
       model_val_preds.append(model_prob)
-      model_test_preds.append(model.predict(X_test))
+      model_test_preds.append(model.predict_proba(X_test)[:,1])
       feat_importance["Importance_Fold"+str(fold)]=model.feature_importances_
       
       calibrated_model = CalibratedClassifierCV(base_estimator=model,cv="prefit")
@@ -140,14 +140,17 @@ def plot_roc_calibration(y_val, y_prob, mpv_cal, fop_cal):
 def main():
     X,X_test,Y,test = initialsetting(train_path,test_path)
     
-    params={'iterations': 284,
-            'depth': 10,
-            'learning_rate': 0.24641023327616474,
-            'random_strength': 0, 
-            'bagging_temperature': 0.21482075013237478,
-            'od_type': 'Iter', 
-            'od_wait': 31,
-            'task_type': "GPU"}   
+    
+    
+    params={'iterations': 4516, 
+        'depth': 10,
+        'learning_rate': 0.03946057958646794, 
+        'random_strength': 86,
+        'bagging_temperature': 0.7680045063918526,
+        'od_type': 'Iter', 
+        'od_wait': 43,
+        'task_type': "GPU"}
+
     
     model = CatBoostClassifier(**params)
     

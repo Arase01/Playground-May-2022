@@ -6,7 +6,6 @@ Created on Fri May 20 13:16:54 2022
 """
 
 import pandas as pd
-import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
 from catboost import CatBoostClassifier
 
