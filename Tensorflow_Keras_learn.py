@@ -7,7 +7,7 @@ Created on Thu May 26 14:43:06 2022
 
 import datetime
 import random
-import math
+
 
 import numpy as np
 import pandas as pd
@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 
 from validation_learn import initialsetting
 from tensorflow.keras.models import Model
-from tensorflow.keras.layers import Dense, Input, InputLayer, Add, Concatenate
+from tensorflow.keras.layers import Dense, Input, InputLayer, Add, Concatenate,BatchNormalization
 from tensorflow.keras.utils import plot_model
 from tensorflow.python.client import device_lib 
 from tensorflow.keras.callbacks import ReduceLROnPlateau, EarlyStopping
@@ -48,6 +48,7 @@ def my_model():
     x = Dense(64, kernel_regularizer=tf.keras.regularizers.l2(40e-6),
               activation=activation,
              )(inputs)
+    x = BatchNormalization()(x)
     x = Dense(64, kernel_regularizer=tf.keras.regularizers.l2(40e-6),
               activation=activation,
              )(x)
@@ -79,6 +80,7 @@ def fit_model(fold,X_train, Y_train, X_val=None, Y_val=None, run=0):
         validation_data = None
 
     lr_start=0.01
+    
     if X_val is not None: # use early stopping
         epochs = EPOCHS
         lr = ReduceLROnPlateau(monitor="val_loss", factor=0.7, 
@@ -115,13 +117,11 @@ def fit_model(fold,X_train, Y_train, X_val=None, Y_val=None, run=0):
         print(f"Update best Fold is {best_fold} to {fold}")
         best_fold = fold    
     else: pass
-
-    callbacks, es, lr, history = None, None, None, None
     
     if X_val is None:
-        print(f"Training loss: {history_list[-1]['loss'][-1]:.4f}")
+        print(f"Training loss: {history_list[0]['loss'][-1]:.4f}")
     else:
-        lastloss = f"Training loss: {history_list[-1]['loss'][-1]:.4f} | Val loss: {history_list[-1]['val_loss'][-1]:.4f}"
+        lastloss = f"Training loss: {history_list[0]['loss'][-1]:.4f} | Val loss: {history_list[0]['val_loss'][-1]:.4f}"
         
         # Inference for validation
         Y_val_pred = model.predict(X_val, batch_size=len(X_val), verbose=0)
@@ -131,6 +131,14 @@ def fit_model(fold,X_train, Y_train, X_val=None, Y_val=None, run=0):
         print(f"Fold {run}.{fold} | {str(datetime.datetime.now() - start_time)[-12:-7]}"
               f" | {lastloss} | AUC: {score:.5f}")
         score_list.append(score)
+        
+        
+        fig, axs = plt.subplots(2,3,figsize=(12,8))
+        for f, ax in zip(history_list[0], axs.ravel()):
+            ax.set_xlabel(f)
+            ax.plot(history_list[0][f])
+        savepath = "output/learn" + str(fold) + ".png"
+        plt.savefig(savepath)
         
         if DIAGRAMS and fold == 0 and run == 0:
             # Plot y_true vs. y_pred
@@ -147,6 +155,8 @@ def fit_model(fold,X_train, Y_train, X_val=None, Y_val=None, run=0):
     
     # Inference for test"
     Y_test_pred = model.predict(X_test, batch_size=BATCH_SIZE,verbose=len(X_test))
+    
+    callbacks, es, lr, history = None, None, None, None
     
     return Y_test_pred
 
@@ -168,7 +178,7 @@ def main():
         if ONLY_FIRST_FOLD: break # we only need the first fold
         
     test_pred = result_list[best_fold].reshape([len(test.id)])
-    print(test_pred)
+
     output = pd.DataFrame({"id": test.id, "target" : test_pred})
     output.to_csv("output/submission.csv",index=False)
         
