@@ -1,2 +1,2 @@
 # Tabular Playground Series - May 2022 用リポジトリ
-![ヘッダー](README-IMG/header.png)
+<img src="README-IMG" width="1600mm">
