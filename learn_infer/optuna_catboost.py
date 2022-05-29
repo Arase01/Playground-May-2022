@@ -34,7 +34,7 @@ def objective(X,Y,trial):
     return 1 - score
     
 def main(): 
-    train = pd.read_csv("input/train.csv")
+    train = pd.read_csv("../input/train.csv")
     scaler = StandardScaler()
     
     uni = train.f_27.apply(lambda s: len(set(s))).rename('unique_characters')

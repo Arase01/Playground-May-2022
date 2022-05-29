@@ -15,8 +15,8 @@ from sklearn.model_selection import KFold
 from sklearn.metrics import roc_auc_score,roc_curve,auc
 from sklearn.calibration import CalibratedClassifierCV,calibration_curve
 
-train_path = "input/train.csv"
-test_path = "input/test.csv"
+train_path = "../input/train.csv"
+test_path = "../input/test.csv"
 colors = px.colors.qualitative.Prism
 temp = dict(layout=go.Layout(font=dict(family="Franklin Gothic", size=12), 
                            height=500, width=1000))

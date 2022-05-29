@@ -10,8 +10,8 @@ from sklearn.preprocessing import StandardScaler
 from catboost import CatBoostClassifier
 
 scaler = StandardScaler()
-train = pd.read_csv("input/train.csv")
-test  = pd.read_csv("input/test.csv")
+train = pd.read_csv("../input/train.csv")
+test  = pd.read_csv("../input/test.csv")
 
 uni = train.f_27.apply(lambda s: len(set(s))).rename('unique_characters')
 uni_test = test.f_27.apply(lambda s: len(set(s))).rename('unique_characters')

@@ -2,4 +2,7 @@
 !output/*
 .DS_Store
 catboost_info
+f_27.py
+plot.py
+
 

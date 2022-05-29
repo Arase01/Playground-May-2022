@@ -25,8 +25,8 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import KFold
 from sklearn.metrics import roc_auc_score,roc_curve,auc
 
-train_path = "input/train.csv"
-test_path = "input/test.csv"
+train_path = "../input/train.csv"
+test_path = "../input/test.csv"
 X,X_test,Y,test = initialsetting(train_path,test_path)
 features = X_test.columns
 
