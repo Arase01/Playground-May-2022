@@ -76,7 +76,20 @@ Data columns (total 33 columns):
  32  target  900000 non-null  int64  
 dtypes: float64(16), int64(16), object(1)
 ```
-targetを除くと、訓練データは15種類のint型(64bit)データと16種類のfloat型(64bit)データと1種の文字列型で構成されていることがわかる。
+targetを除くと、訓練データは15種類のint型(64bit)データと16種類のfloat型(64bit)データと1種の文字列型で構成されていることがわかる。  
+特徴量としてf_00~f30の値と、f_02とf_21、f_05とf_22、f_00とf_01とf_26の値の和が閾値を超えるか否か(bool)の34種を選択する。  
+また、f_27はユニークな文字数(int)に変換して使用する。
+
+## 学習と推論
+
+`optuna_catboost.py`で最適なパラメータを推定  
+↓  
+得たパラメータを`validation_learn.py`で設定して学習、推論  
+また、`tabular_learn.py`でvalidationをしない学習、推論
+  
+もしくは、`Tensorflow_Keras_learn.py`でCNNによる学習、推論を行う。
+
+
 
 
 
