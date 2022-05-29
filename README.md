@@ -89,8 +89,3 @@ targetを除くと、訓練データは15種類のint型(64bit)データと16種
   
 もしくは、`Tensorflow_Keras_learn.py`でCNNによる学習、推論を行う。
 
-
-
-
-
-
